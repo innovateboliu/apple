@@ -8,8 +8,6 @@ import java.util.Random;
 
 public class TweetGenerator {
 	
-	
-	
 	private static final double COEFFICIENT = 0.75;
 	
 	private Schedule[] schedules;
@@ -20,15 +18,11 @@ public class TweetGenerator {
 	
 	private Calendar stopCalendar;
 	
-	private Location Tonka, Timbuktu;
-	
 	private Random[] delayRandoms;
 	
 	public TweetGenerator() {
 		tweets = new ArrayList<Tweet>();
 		
-		Tonka = new Location("Tonka", 120000, 0);
-		Timbuktu = new Location("Timbuktu", 0, 0);
 		schedules = Utils.buildSchedules();
 		curCalendar = Calendar.getInstance();
 		stopCalendar = Calendar.getInstance();
@@ -37,7 +31,7 @@ public class TweetGenerator {
 		delayRandoms[0] = new Random();
 		delayRandoms[1] = new Random();
 	}
-	public void generateTweets(long startTime, long duration) {
+	public List<Tweet> generateTweets(long startTime, long duration) {
 		curCalendar.setTime(new Date(startTime));
 		stopCalendar.setTime(new Date(startTime + duration));
 		
@@ -54,8 +48,8 @@ public class TweetGenerator {
 		while (curCalendar.before(stopCalendar)) {
 			Direction direction = curHour / 6 %2 == 0 ? Direction.TIMBUKTUTOTONKA : Direction.TONKATOTIMBUKTU;
 			if (curHour % 6 >= 2) { // the train is at station
-				double curLong = direction.equals(Direction.TONKATOTIMBUKTU) ? Timbuktu.getLongitude() : Tonka.getLongitude();
-				double curLat = Timbuktu.getLongitude();
+				double curLong = direction.equals(Direction.TONKATOTIMBUKTU) ? Utils.Timbuktu.getLongitude() : Utils.Tonka.getLongitude();
+				double curLat = Utils.Timbuktu.getLongitude();
 				generateTweet(curLong, curLat);
 				curCalendar.add(Calendar.MINUTE, 5);
 			} else { // the train is on the way or delay at station
@@ -69,13 +63,14 @@ public class TweetGenerator {
 			}
 			curHour = curCalendar.get(Calendar.HOUR_OF_DAY);
 		}
+		return tweets;
 	}
 	
 	private void generateTweetsWhenRunning(int departureDelayMinutes, Direction direction) {
 		int curMinute = curCalendar.get(Calendar.MINUTE);
 		while (curMinute < departureDelayMinutes) {
-			double curLong = direction.equals(Direction.TONKATOTIMBUKTU) ? Tonka.getLongitude() : Timbuktu.getLongitude();
-			double curLat = Timbuktu.getLongitude();
+			double curLong = direction.equals(Direction.TONKATOTIMBUKTU) ? Utils.Tonka.getLongitude() : Utils.Timbuktu.getLongitude();
+			double curLat = Utils.Timbuktu.getLongitude();
 			generateTweet(curLong, curLat);
 			curCalendar.add(Calendar.MINUTE, 5);
 			curMinute = curCalendar.get(Calendar.MINUTE);
@@ -90,8 +85,9 @@ public class TweetGenerator {
 		int startMinutues = departureDelayMinutes;
 		int stopMinutes = 120 + arrivalDelayMinutes;
 		for (int curMinute = curCalendar.get(Calendar.MINUTE); curMinute <= stopMinutes; ) {
-			double curLong = (curMinute - startMinutues) * speed * schedule.getDirection() + schedule.getFrom().getLongitude();
-			double curLat = schedule.getFrom().getLatitude();
+			Tuple coor = Utils.calcCoordinates((curMinute - startMinutues) * speed, new Tuple(schedule.getFrom().getLongitude(), schedule.getFrom().getLatitude()), schedule.getDirection());
+			double curLong = coor.getA();
+			double curLat = coor.getB();
 			generateTweet(curLong, curLat);
 			
 			curCalendar.add(Calendar.MINUTE, 5);
@@ -100,7 +96,7 @@ public class TweetGenerator {
 	}
 	
 	private void generateTweet(double curLong, double curLat) {
-		double noiseLong = 1;
+		double noiseLong = new Random().nextDouble() * 0.0045;
 		tweets.add(new Tweet("I have seen the time machine!", curLong + noiseLong, curLat, curCalendar));
 	}
 

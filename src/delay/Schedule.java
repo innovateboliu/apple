@@ -5,10 +5,10 @@ public class Schedule {
 	private int arrivalHour;
 	private Location from;
 	private Location to;
-	private int direction;
+	private double direction;
 	
 	public Schedule(Location from, Location to, int departureHour,
-			int arrivalHour, int direction) {
+			int arrivalHour, double direction) {
 		super();
 		this.from = from;
 		this.to = to;
@@ -17,11 +17,11 @@ public class Schedule {
 		this.direction = direction;
 	}
 
-	public int getDirection() {
+	public double getDirection() {
 		return direction;
 	}
 
-	public void setDirection(int direction) {
+	public void setDirection(double direction) {
 		this.direction = direction;
 	}
 

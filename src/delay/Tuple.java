@@ -22,4 +22,17 @@ public class Tuple {
 
 	public Tuple() {
 	}
+	
+	public Tuple(double a, double b) {
+		this.a = a;
+		this.b = b;
+	}
+	
+	@Override
+	public Tuple clone() {
+		Tuple result = new Tuple();
+		result.setA(a);
+		result.setB(b);
+		return result;
+	}
 }
