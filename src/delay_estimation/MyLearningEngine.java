@@ -1,4 +1,4 @@
-package delay;
+package delay_estimation;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -8,24 +8,29 @@ import java.util.Map;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
-public class LearningEngine {
+import delay_estimation.Utils.ExecutionOrderException;
 
-	private Map<Location, List<Tuple>> delayData;
-	private Map<Location, Tuple> cityDelays;
-	private SimpleRegression regressionEngine;
-	private boolean isLearningDepartureDelayDone;
+public class MyLearningEngine implements LearningEngine{
 
-	public LearningEngine() {
-		this.delayData = new HashMap<Location, List<Tuple>>();
-		cityDelays = new HashMap<Location, Tuple>();
+	private Map<Location, List<Tuple<Double>>> delayData;	// contains the all departure/arrival delay data of the two city(as start station)  
+	private Map<Location, Tuple<Double>> cityDelays;		// the result which contains the departure/arrival delay of the two cities
+	private SimpleRegression regressionEngine;				// the engine which use Least Square Regression to generate linear relation between departure delay and arrival delay
+	private boolean isLearningDepartureDelayDone;	
+	private boolean isLearningDone;
+
+	public MyLearningEngine() {
+		this.delayData = new HashMap<Location, List<Tuple<Double>>>();
+		cityDelays = new HashMap<Location, Tuple<Double>>();
 		regressionEngine = new SimpleRegression();
 		isLearningDepartureDelayDone = false;
+		isLearningDone = false;
 	}
 
 	public void parseTweets(List<Tweet> tweets) {
 		cleanData(tweets);
 		learnDepartureDelay();
 		learnArrivalDelay();
+		isLearningDone = true;
 	}
 
 	private void cleanData(List<Tweet> tweets) {
@@ -33,11 +38,11 @@ public class LearningEngine {
 		int curHour = 0;
 		int curMinutes = 0;
 		boolean isRunning = false;
-		Tuple delayTuple = new Tuple();
+		Tuple<Double> delayTuple = new Tuple<Double>();
 		Tweet previousTweet = null;
 		
-		delayData.put(Utils.Timbuktu, new ArrayList<Tuple>());
-		delayData.put(Utils.Tonka, new ArrayList<Tuple>());
+		delayData.put(Utils.Timbuktu, new ArrayList<Tuple<Double>>());
+		delayData.put(Utils.Tonka, new ArrayList<Tuple<Double>>());
 
 		for (Tweet tweet : tweets) {
 			curHour = tweet.getCalendar().get(Calendar.HOUR_OF_DAY);
@@ -58,7 +63,7 @@ public class LearningEngine {
 						double speed = Utils.DISTANCE / Utils.TIME;
 						int runningMinutes = (int)(distance / speed);
 						int delayMinutes = curMinutes + 60 * (curHour - schedule.getDepartureHour()) - runningMinutes;
-						delayTuple.setA(delayMinutes);
+						delayTuple.setA((double)delayMinutes);
 						isRunning = true;
 					}
 				}
@@ -74,7 +79,7 @@ public class LearningEngine {
 					double speed = Utils.DISTANCE / Utils.TIME;
 					int runningMinutes = (int)(distance / speed);
 					int delayMinutes = (preMinutes + runningMinutes) % 60 ;
-					delayTuple.setB(delayMinutes);
+					delayTuple.setB((double)delayMinutes);
 					isRunning = false;
 					Location from = schedule.getFrom();
 					delayData.get(from).add(delayTuple.clone());
@@ -86,15 +91,15 @@ public class LearningEngine {
 	}
 
 	private void learnDepartureDelay() {
-		for (Map.Entry<Location, List<Tuple>> cityDelay : delayData.entrySet()) {
+		for (Map.Entry<Location, List<Tuple<Double>>> cityDelay : delayData.entrySet()) {
 			Location from = cityDelay.getKey();
-			List<Tuple> delays = cityDelay.getValue();
+			List<Tuple<Double>> delays = cityDelay.getValue();
 			int num = delays.size();
 			double sumDepartureDelay = 0;
 			for (int i = 0; i < num; i++) {
 				sumDepartureDelay += delays.get(i).getA();
 			}
-			Tuple estimatedDelay = new Tuple();
+			Tuple<Double> estimatedDelay = new Tuple<Double>();
 			estimatedDelay.setA(sumDepartureDelay / num);
 			cityDelays.put(from, estimatedDelay);
 		}
@@ -105,11 +110,11 @@ public class LearningEngine {
 		if (!isLearningDepartureDelayDone) {
 			learnDepartureDelay();
 		}
-		for (Map.Entry<Location, List<Tuple>> cityDelay : delayData.entrySet()) {
+		for (Map.Entry<Location, List<Tuple<Double>>> cityDelay : delayData.entrySet()) {
 			regressionEngine.clear();
 			Location from = cityDelay.getKey();
 			Location to = from.getName().equals("Timbuktu") ? Utils.Tonka : Utils.Timbuktu;
-			List<Tuple> delays = cityDelay.getValue();
+			List<Tuple<Double>> delays = cityDelay.getValue();
 			int size = delays.size();
 			double[][] input = new double[size][2];
 			for (int i = 0; i < size; i++) {
@@ -124,16 +129,22 @@ public class LearningEngine {
 		}
 	}
 
-	public double delayLeaving(Location station) {
+	public double delayDeparture(Location station) throws ExecutionOrderException {
+		if (!isLearningDone) {
+			throw new ExecutionOrderException("Please run parseTweets first");
+		}
 		return cityDelays.get(station).getA();
 	}
 
-	public double delayArriving(Location station) {
+	public double delayArrival(Location station) throws ExecutionOrderException {
+		if (!isLearningDone) {
+			throw new ExecutionOrderException("Please run parseTweets first");
+		}
 		return cityDelays.get(station).getB();
 	}
 
 	public static void main(String[] args) {
-		LearningEngine engine = new LearningEngine();
+		MyLearningEngine engine = new MyLearningEngine();
 		double[][] data = { { 100, 72 }, { 60, 44 }, { 20, 17 }, { 40, 32 },
 				{ 36, 24 }, { 16, 10 } };
 		engine.regressionEngine.addData(data);

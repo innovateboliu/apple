@@ -1,15 +1,14 @@
-package delay;
+package delay_estimation;
 
 public class Schedule {
 	private int departureHour;
 	private int arrivalHour;
 	private Location from;
 	private Location to;
-	private double direction;
+	private double direction; // angle of direction
 	
 	public Schedule(Location from, Location to, int departureHour,
 			int arrivalHour, double direction) {
-		super();
 		this.from = from;
 		this.to = to;
 		this.departureHour = departureHour;
@@ -24,8 +23,6 @@ public class Schedule {
 	public void setDirection(double direction) {
 		this.direction = direction;
 	}
-
-	
 
 	public Location getFrom() {
 		return from;

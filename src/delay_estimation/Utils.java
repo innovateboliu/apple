@@ -1,8 +1,9 @@
-package delay;
+package delay_estimation;
 
 public class Utils {
 	public static final double DISTANCE = 120000;
 	public static final double TIME = 120;
+	public static final double COEFFICIENT = 0.75; // arrivalDelay = COEFFICIENT * departureDelay;
 	public static final Location Tonka = new Location("Tonka", 1.08, 0);
 	public static final Location Timbuktu = new Location("Timbuktu", 0, 0);
 	public static Schedule[] buildSchedules() {
@@ -30,7 +31,7 @@ public class Utils {
 	    return dist * meterConversion;
 	}
 	
-	public static Tuple calcCoordinates(final double distance, final Tuple origpoint, final double angle) {
+	public static Tuple<Double> calcCoordinates(final double distance, final Tuple<Double> origpoint, final double angle) {
         final double distanceNorth = Math.sin(Math.toRadians(angle)) * distance;
         final double distanceEast = Math.cos(Math.toRadians(angle)) * distance;
  
@@ -40,11 +41,14 @@ public class Utils {
 
         final double newLon = origpoint.getA() + (distanceEast / (earthRadius * Math.cos(newLat * 180 / Math.PI))) * 180 / Math.PI;
  
-        return new Tuple(newLon, newLat);
-}
-	
-	public static void main(String[] args) {
-		System.out.println(calcDistance(1.04, 0, 1.08, 0));
-		System.out.println(calcCoordinates(500, new Tuple(0, 0), 180).getA());
+        return new Tuple<Double>(newLon, newLat);
 	}
+	
+	public static class ExecutionOrderException extends Exception {
+		private static final long serialVersionUID = 3319839166913989186L;
+		public ExecutionOrderException(String message) {
+			super(message);
+		}
+	}
+
 }	
