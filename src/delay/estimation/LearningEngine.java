@@ -1,8 +1,8 @@
-package delay_estimation;
+package delay.estimation;
 
 import java.util.List;
 
-import delay_estimation.Utils.ExecutionOrderException;
+import delay.estimation.Utils.ExecutionOrderException;
 
 public interface LearningEngine {
 	void parseTweets(List<Tweet> tweets);

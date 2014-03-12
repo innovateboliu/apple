@@ -1,4 +1,4 @@
-package delay_estimation;
+package delay.estimation;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
-import delay_estimation.Utils.ExecutionOrderException;
+import delay.estimation.Utils.ExecutionOrderException;
 
 public class MyLearningEngine implements LearningEngine{
 

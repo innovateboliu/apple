@@ -1,4 +1,4 @@
-package delay_estimation;
+package delay.estimation;
 
 public class Utils {
 	public static final double DISTANCE = 120000;

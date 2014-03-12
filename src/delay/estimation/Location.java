@@ -1,4 +1,4 @@
-package delay_estimation;
+package delay.estimation;
 
 public class Location {
 	private String name;
