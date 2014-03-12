@@ -30,10 +30,13 @@ public class LearningEngine {
 	private void cleanData(List<Tweet> tweets) {
 		Schedule[] schedules = Utils.buildSchedules();
 		int curHour = 0;
+		int curMinutes = 0;
 		boolean isRunning = false;
+		Tuple delayTuple = new Tuple();
 		for (Tweet tweet : tweets) {
 			curHour = tweet.getCalendar().get(Calendar.HOUR_OF_DAY);
-			if (!isRunning) {
+			curMinutes = tweet.getCalendar().get(Calendar.MINUTE);
+			if (!isRunning) { // the train is still at station
 				if (curHour % 6 > 0 && curHour % 6 <= 1) {
 					double curLong = tweet.getLongitude();
 					double curLat = tweet.getLatitude();
@@ -44,9 +47,15 @@ public class LearningEngine {
 					//first tweet after the train departures
 					double distance = Utils.calcDistance(curLong, curLat, fromLong, fromLat);
 					if (distance > 500) {
-						
+						double speed = Utils.DISTANCE / Utils.TIME;
+						int runningMinutes = (int)(distance / speed);
+						int delayMinutes = curMinutes + 60 * (curHour - schedule.getDepartureHour()) - runningMinutes;
+						delayTuple.setA(delayMinutes);
+						isRunning = true;
 					}
 				}
+			} else { // the train is on the way
+				
 			}
 
 		}
