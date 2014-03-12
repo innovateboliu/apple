@@ -1,3 +1,4 @@
+package location;
 import java.util.Arrays;
 
 import org.apache.commons.math3.optimization.PointVectorValuePair;
@@ -9,44 +10,44 @@ public class Positioning {
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		ObjectiveFunction function = new ObjectiveFunction();
-
-		function.addPoint(0, 0, 205);
-		function.addPoint(0, 10, 98);
-		function.addPoint(10, 0, 103);
-		function.addPoint(10, 9, 1.4);
-		function.addPoint(5, 5, 51.6);
-		function.addPoint(11, 11, 2.6);
-		function.addPoint(8, 10, 4.8);
-
-//		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
-		
-//		GaussNewtonOptimizer optimizer = new GaussNewtonOptimizer();
-		GaussNewtonOptimizer optimizer = new GaussNewtonOptimizer(new SimpleVectorValueChecker(0.1, 0.2, 50));
-		
-
-		
-		// final double[] weights = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
-		final double[] weights = { 1, 1, 1, 1, 1, 1, 1};
-
-		// final double[] initialSolution = {1, 1, 1};
-		final double[] initialSolution = { 140, 2500};
-
-		PointVectorValuePair optimum = optimizer.optimize(100, function,
-				function.calculateTarget(), weights, initialSolution);
-		double[] res = function.value(new double[] {10, 10});
-		System.out.println(optimizer.getEvaluations());
-//		System.out.println(((SimpleVectorValueChecker)optimizer.getConvergenceChecker()).getAbsoluteThreshold());
-//		System.out.println(((SimpleVectorValueChecker)optimizer.getConvergenceChecker()).getRelativeThreshold());
-
-		final double[] optimalValues = optimum.getPoint();
-
-		System.out.println("A: " + optimalValues[0]);
-		System.out.println("B: " + optimalValues[1]);
-		// System.out.println("C: " + optimalValues[2]);
-	}
+//	public static void main(String[] args) {
+//		// TODO Auto-generated method stub
+//		ObjectiveFunction function = new ObjectiveFunction();
+//
+//		function.addPoint(0, 0, 205);
+//		function.addPoint(0, 10, 98);
+//		function.addPoint(10, 0, 103);
+//		function.addPoint(10, 9, 1.4);
+//		function.addPoint(5, 5, 51.6);
+//		function.addPoint(11, 11, 2.6);
+//		function.addPoint(8, 10, 4.8);
+//
+////		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
+//		
+////		GaussNewtonOptimizer optimizer = new GaussNewtonOptimizer();
+//		GaussNewtonOptimizer optimizer = new GaussNewtonOptimizer(new SimpleVectorValueChecker(0.1, 0.2, 50));
+//		
+//
+//		
+//		// final double[] weights = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+//		final double[] weights = { 1, 1, 1, 1, 1, 1, 1};
+//
+//		// final double[] initialSolution = {1, 1, 1};
+//		final double[] initialSolution = { 140, 2500};
+//
+//		PointVectorValuePair optimum = optimizer.optimize(100, function,
+//				function.calculateTarget(), weights, initialSolution);
+//		double[] res = function.value(new double[] {10, 10});
+//		System.out.println(optimizer.getEvaluations());
+////		System.out.println(((SimpleVectorValueChecker)optimizer.getConvergenceChecker()).getAbsoluteThreshold());
+////		System.out.println(((SimpleVectorValueChecker)optimizer.getConvergenceChecker()).getRelativeThreshold());
+//
+//		final double[] optimalValues = optimum.getPoint();
+//
+//		System.out.println("A: " + optimalValues[0]);
+//		System.out.println("B: " + optimalValues[1]);
+//		// System.out.println("C: " + optimalValues[2]);
+//	}
 	
 	public static void getLocation(WifiAP[] wifiAPs, LocationBuilder locationBuilder) {
 		double avgLong = (wifiAPs[0].getLocation().getLongitude() + wifiAPs[1].getLocation().getLongitude()) / 2;

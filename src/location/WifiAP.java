@@ -1,3 +1,4 @@
+package location;
 
 public class WifiAP {
 	private char[] mac;

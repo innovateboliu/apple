@@ -1,3 +1,4 @@
+package location;
 public class LocationBuilder {
 	private Location location;
 	private double standardDeviation;
