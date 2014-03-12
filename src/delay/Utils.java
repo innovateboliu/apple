@@ -44,7 +44,7 @@ public class Utils {
 }
 	
 	public static void main(String[] args) {
-		System.out.println(calcDistance(0, 0, -0.0045, 0));
+		System.out.println(calcDistance(1.04, 0, 1.08, 0));
 		System.out.println(calcCoordinates(500, new Tuple(0, 0), 180).getA());
 	}
 }	

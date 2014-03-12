@@ -97,7 +97,9 @@ public class TweetGenerator {
 	
 	private void generateTweet(double curLong, double curLat) {
 		double noiseLong = new Random().nextDouble() * 0.0045;
-		tweets.add(new Tweet("I have seen the time machine!", curLong + noiseLong, curLat, curCalendar));
+		int hour = curCalendar.get(Calendar.HOUR_OF_DAY);
+		int min = curCalendar.get(Calendar.MINUTE);
+		tweets.add(new Tweet("I have seen the time machine!", curLong + noiseLong, curLat, (Calendar)curCalendar.clone()));
 	}
 
 	public static void main(String[] args) {

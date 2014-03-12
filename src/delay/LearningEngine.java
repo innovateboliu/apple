@@ -48,7 +48,7 @@ public class LearningEngine {
 			Schedule schedule = schedules[curHour / 6];
 			
 			if (!isRunning) { // the train is still at station
-				if (curHour % 6 > 0 && curHour % 6 <= 1) {
+				if (curHour % 6 >= 0 && curHour % 6 <= 1) {
 					double fromLong = schedule.getFrom().getLongitude();
 					double fromLat = schedule.getFrom().getLatitude();
 					
@@ -69,16 +69,17 @@ public class LearningEngine {
 				if (distance < 500) {
 					double preLong = previousTweet.getLongitude();
 					double preLat = previousTweet.getLatitude();
-					distance = Utils.calcDistance(preLong, preLat, toLong, toLong);
+					distance = Utils.calcDistance(preLong, preLat, toLong, toLat);
 					int preMinutes = previousTweet.getCalendar().get(Calendar.MINUTE);
 					double speed = Utils.DISTANCE / Utils.TIME;
 					int runningMinutes = (int)(distance / speed);
 					int delayMinutes = (preMinutes + runningMinutes) % 60 ;
 					delayTuple.setB(delayMinutes);
 					isRunning = false;
+					Location from = schedule.getFrom();
+					delayData.get(from).add(delayTuple.clone());
 				}
-				Location from = schedule.getFrom();
-				delayData.get(from).add(delayTuple.clone());
+				
 			}
 			previousTweet = tweet;
 		}
