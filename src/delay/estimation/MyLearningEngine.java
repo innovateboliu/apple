@@ -27,10 +27,24 @@ public class MyLearningEngine implements LearningEngine{
 	}
 
 	public void parseTweets(List<Tweet> tweets) {
-		cleanData(tweets);
-		learnDepartureDelay();
-		learnArrivalDelay();
+		cleanData(tweets);		// clean the raw tweets, retrieve the departure/arrive delay info
+		learnDepartureDelay();	// learn the departure delay based on the retrieved info 
+		learnArrivalDelay();	// learn the departure delay based on the retrieved info and learned departure delay
 		isLearningDone = true;
+	}
+	
+	public double delayDeparture(Location station) throws ExecutionOrderException {
+		if (!isLearningDone) {
+			throw new ExecutionOrderException("Please run parseTweets first");
+		}
+		return cityDelays.get(station).getA();
+	}
+
+	public double delayArrival(Location station) throws ExecutionOrderException {
+		if (!isLearningDone) {
+			throw new ExecutionOrderException("Please run parseTweets first");
+		}
+		return cityDelays.get(station).getB();
 	}
 
 	private void cleanData(List<Tweet> tweets) {
@@ -59,6 +73,8 @@ public class MyLearningEngine implements LearningEngine{
 					
 					//first tweet after the train departures
 					double distance = Utils.calcDistance(curLong, curLat, fromLong, fromLat);
+					
+					// retrieve the first tweet which is away from the departure station more than 500 meters, then calculated the departure time based on that distance
 					if (distance > 500) {
 						double speed = Utils.DISTANCE / Utils.TIME;
 						int runningMinutes = (int)(distance / speed);
@@ -71,6 +87,8 @@ public class MyLearningEngine implements LearningEngine{
 				double toLong = schedule.getTo().getLongitude();
 				double toLat = schedule.getTo().getLatitude();
 				double distance = Utils.calcDistance(curLong, curLat, toLong, toLat);
+				
+				// retrieve the last tweet which is away from the arrival station more than 500 meters, then calculated the arrival time based on that distance
 				if (distance < 500) {
 					double preLong = previousTweet.getLongitude();
 					double preLat = previousTweet.getLatitude();
@@ -90,6 +108,7 @@ public class MyLearningEngine implements LearningEngine{
 		}
 	}
 
+	// As to the fact that departure delay conforms to Gaussian Distribution, so the sample which maximums the probability density function is the mean of all samples
 	private void learnDepartureDelay() {
 		for (Map.Entry<Location, List<Tuple<Double>>> cityDelay : delayData.entrySet()) {
 			Location from = cityDelay.getKey();
@@ -106,6 +125,7 @@ public class MyLearningEngine implements LearningEngine{
 		isLearningDepartureDelayDone = true;
 	}
 
+	// As to the fact that arrival delay has linear relation with departure delay, so by using Least Square regression, the estimated arrival delay could be calculated from the estimated departure delay and the samples of arrival delay, 
 	private void learnArrivalDelay() {
 		if (!isLearningDepartureDelayDone) {
 			learnDepartureDelay();
@@ -129,27 +149,4 @@ public class MyLearningEngine implements LearningEngine{
 		}
 	}
 
-	public double delayDeparture(Location station) throws ExecutionOrderException {
-		if (!isLearningDone) {
-			throw new ExecutionOrderException("Please run parseTweets first");
-		}
-		return cityDelays.get(station).getA();
-	}
-
-	public double delayArrival(Location station) throws ExecutionOrderException {
-		if (!isLearningDone) {
-			throw new ExecutionOrderException("Please run parseTweets first");
-		}
-		return cityDelays.get(station).getB();
-	}
-
-	public static void main(String[] args) {
-		MyLearningEngine engine = new MyLearningEngine();
-		double[][] data = { { 100, 72 }, { 60, 44 }, { 20, 17 }, { 40, 32 },
-				{ 36, 24 }, { 16, 10 } };
-		engine.regressionEngine.addData(data);
-		System.out.println(engine.regressionEngine.getSlope());
-		System.out.println(engine.regressionEngine.getIntercept());
-		System.out.println(engine.regressionEngine.getSlopeStdErr());
-	}
 }
